@@ -1,32 +1,45 @@
-import javafx.application.Application;
-import javafx.scene.Scene;
-import javafx.scene.image.Image;
-import javafx.scene.layout.BorderPane;
-import javafx.stage.Stage;
-import javafx.scene.image.ImageView;
+import java.util.ArrayList;
 
-public class Player extends Application {
+public class Player
+{
+    private int points;
+    private String color;
+    private DestinationCard[] destinationCards = new DestinationCard[3];
+    private ArrayList<Card> hand = new ArrayList<>();
 
-    public void start(Stage primaryStage){
-        //Root Node
-        BorderPane rootNode = new BorderPane();
 
-        //Drawing Board
-        ImageView board = new ImageView(new Image("res/game_board.jpg"));
-        board.setFitWidth(1296);
-        board.setFitHeight(864);
-        rootNode.setCenter(board);
 
-        //Setting Up Primary Stage and Scene
-        Scene boardScene = new Scene(rootNode);
-        primaryStage.setScene(boardScene);
-        primaryStage.setTitle("Ticket to Ride FX");
-        primaryStage.show();
-        primaryStage.setFullScreen(true);
-        primaryStage.setMaximized(true);
+    public Player(String color, DestinationCard destCard1, DestinationCard destCard2, DestinationCard destCard3){
+        this.color = color;
+        points = 0;
+        destinationCards[0] = destCard1;
+        destinationCards[1] = destCard2;
+        destinationCards[2] = destCard3;
     }
 
-    public static void main(String[]args){
-        launch(args);
+    public int getPoints() {
+        return points;
+    }
+
+    public void addPoints(int points){this.points += points;}
+
+    public void setPoints(int points) {
+        this.points = points;
+    }
+
+    public DestinationCard[] getDestinationCards() {
+        return destinationCards;
+    }
+
+    public void setDestinationCards(DestinationCard[] destinationCards) {
+        this.destinationCards = destinationCards;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public ArrayList<Card> getHand() {
+        return hand;
     }
 }
