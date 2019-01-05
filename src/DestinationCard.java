@@ -1,6 +1,6 @@
 import java.io.*;
 
-public class DestinationCard {
+public class DestinationCard implements Serializable{
     private String dest1;
     private String dest2;
     private int pointValue;

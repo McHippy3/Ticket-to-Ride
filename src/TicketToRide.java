@@ -1,4 +1,5 @@
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -9,6 +10,8 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
@@ -18,9 +21,10 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.stage.WindowEvent;
 
+import java.io.File;
 import java.io.IOException;
 
-public class UI extends Application {
+public class TicketToRide extends Application {
     private Stage primaryStage;
     private Host host;
     private Client client;
@@ -32,6 +36,9 @@ public class UI extends Application {
 
 
     }
+
+    public static void main(String[]args){
+        launch(args);}
 
     private void setSelectScreen()
     {
@@ -87,6 +94,83 @@ public class UI extends Application {
 
         //Command Panel
         GridPane commandPanel = new GridPane();
+
+        commandPanel.setPrefSize(1296,250);
+        commandPanel.setPadding(new Insets(10));
+        commandPanel.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
+
+        centerBox.getChildren().addAll(board, commandPanel);
+        rootNode.setCenter(centerBox);
+        BorderPane.setMargin(board, new Insets(10));
+
+        //Left Side Tiles
+        VBox leftBox = new VBox(25.0);
+        leftBox.setAlignment(Pos.CENTER);
+        leftBox.setPadding(new Insets(25));
+
+        //Player 1
+        GridPane player1Tile = new GridPane();
+        player1Tile.setAlignment(Pos.CENTER);
+        player1Tile.setPrefSize(252,500);
+        player1Tile.setPadding(new Insets(10));
+        player1Tile.setBackground(new Background(new BackgroundFill(Color.LIGHTBLUE, CornerRadii.EMPTY, Insets.EMPTY)));
+        player1Tile.add(new Text("PLAYER 1"), 0, 0, 2, 2);
+
+        //Player 2
+        GridPane player2Tile = new GridPane();
+        player2Tile.setAlignment(Pos.CENTER);
+        player2Tile.setPrefSize(252,500);
+        player2Tile.setPadding(new Insets(10));
+        player2Tile.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
+        player2Tile.add(new Text("PLAYER 2"), 0, 0, 2, 2);
+
+        leftBox.getChildren().addAll(player1Tile, player2Tile);
+        rootNode.setLeft(leftBox);
+
+        //Right Side Tiles
+        VBox rightBox = new VBox(25.0);
+        rightBox.setAlignment(Pos.CENTER);
+        rightBox.setPadding(new Insets(25));
+
+        //Player 3
+        GridPane player3Tile = new GridPane();
+        player3Tile.setAlignment(Pos.CENTER);
+        player3Tile.setPrefSize(252,500);
+        player3Tile.setPadding(new Insets(10));
+        player3Tile.setBackground(new Background(new BackgroundFill(Color.LIGHTYELLOW, CornerRadii.EMPTY, Insets.EMPTY)));
+        player3Tile.add(new Text("PLAYER 3"), 0, 0, 2, 2);
+
+        //Player 4
+        GridPane player4Tile = new GridPane();
+        player4Tile.setAlignment(Pos.CENTER);
+        player4Tile.setPrefSize(252,500);
+        player4Tile.setPadding(new Insets(10));
+        player4Tile.setBackground(new Background(new BackgroundFill(Color.PINK, CornerRadii.EMPTY, Insets.EMPTY)));
+        player4Tile.add(new Text("PLAYER 4"), 0, 0, 2, 2);
+
+        rightBox.getChildren().addAll(player3Tile, player4Tile);
+        rootNode.setRight(rightBox);
+
+        //Setting Up Primary Stage and Scene
+        primaryStage.setScene(new Scene(rootNode));
+        primaryStage.setMaximized(true);
+    }
+
+    private void setOnlineBoardScene()
+    {
+        //Root Node
+        BorderPane rootNode = new BorderPane();
+
+        //Drawing Center (board and command panel)
+        VBox centerBox = new VBox(25.0);
+        centerBox.setAlignment(Pos.CENTER);
+        ImageView board = new ImageView(new Image("res/game_board.jpg"));
+        board.setFitWidth(1037);
+        board.setFitHeight(691);
+
+        //Command Panel
+        GridPane commandPanel = new GridPane();
+
         commandPanel.setPrefSize(1296,250);
         commandPanel.setPadding(new Insets(10));
         commandPanel.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
@@ -105,12 +189,14 @@ public class UI extends Application {
         player1Tile.setPrefSize(252,500);
         player1Tile.setPadding(new Insets(10));
         player1Tile.setBackground(new Background(new BackgroundFill(Color.LIGHTBLUE, CornerRadii.EMPTY, Insets.EMPTY)));
+        player1Tile.add(new Text(client.getAllPlayers()[0].getName()), 0, 0, 2, 2);
 
         //Player 2
         GridPane player2Tile = new GridPane();
         player2Tile.setPrefSize(252,500);
         player2Tile.setPadding(new Insets(10));
         player2Tile.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
+        player2Tile.add(new Text(client.getAllPlayers()[1].getName()), 0, 0, 2, 2);
 
         leftBox.getChildren().addAll(player1Tile, player2Tile);
         rootNode.setLeft(leftBox);
@@ -125,12 +211,14 @@ public class UI extends Application {
         player3Tile.setPrefSize(252,500);
         player3Tile.setPadding(new Insets(10));
         player3Tile.setBackground(new Background(new BackgroundFill(Color.LIGHTYELLOW, CornerRadii.EMPTY, Insets.EMPTY)));
+        player3Tile.add(new Text(client.getAllPlayers()[2].getName()), 0, 0, 2, 2);
 
         //Player 4
         GridPane player4Tile = new GridPane();
         player4Tile.setPrefSize(252,500);
         player4Tile.setPadding(new Insets(10));
         player4Tile.setBackground(new Background(new BackgroundFill(Color.PINK, CornerRadii.EMPTY, Insets.EMPTY)));
+        player4Tile.add(new Text(client.getAllPlayers()[3].getName()), 0, 0, 2, 2);
 
         rightBox.getChildren().addAll(player3Tile, player4Tile);
         rootNode.setRight(rightBox);
@@ -139,9 +227,6 @@ public class UI extends Application {
         primaryStage.setScene(new Scene(rootNode));
         primaryStage.setMaximized(true);
     }
-
-    private void setOnlineBoardScene()
-    {}
 
     private void setOnlineSelectScene()
     {
@@ -255,6 +340,42 @@ public class UI extends Application {
         primaryStage.setScene(new Scene(items));
     }
 
+    //Loading screen before all players have joined
+    private void setWaitingScene()
+    {
+        Text t1 = new Text("Waiting for Players...");
+        t1.setFont(new Font(25));
+        StackPane stackPane = new StackPane(t1);
+        stackPane.setAlignment(Pos.CENTER);
+
+        //Plays generic elevator music
+        //TODO Uncomment
+        /*Media loadingMusic = new Media(new File("src/res/Elevator-music.mp3").toURI().toString());
+        MediaPlayer player = new MediaPlayer(loadingMusic);
+        player.play();*/
+
+        primaryStage.setScene(new Scene(stackPane));
+
+
+
+        //Changes scene once all players have connected
+        Thread loadingThread = new Thread(() -> {
+            while(!client.getGameStarted()) {
+                try {
+                    Thread.sleep(1);
+                }
+                catch (InterruptedException e){}
+            }
+            //player.stop();
+            startOnline();
+        });
+
+        //Terminate thread if application exits
+        loadingThread.setDaemon(true);
+
+        loadingThread.start();
+    }
+
     private void createClient(int portNumber, String address, String name)
     {
         try
@@ -262,8 +383,11 @@ public class UI extends Application {
             client = new Client(portNumber, address, name);
             client.start();
             //Close thread when closing
-            primaryStage.setOnCloseRequest((WindowEvent e) -> client.close());
-            setOnlineBoardScene();
+            primaryStage.setOnCloseRequest((WindowEvent e) -> {
+                client.close();
+                System.exit(0);
+            });
+            setWaitingScene();
         }
         catch(IOException e)
         {
@@ -303,5 +427,9 @@ public class UI extends Application {
     }
 
     private void startOnline()
-    {}
+    {
+        Platform.runLater(
+                () -> setOnlineBoardScene()
+        );
+    }
 }

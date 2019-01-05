@@ -1,20 +1,21 @@
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.*;
 import java.util.ArrayList;
 
-public class Host
+public class Host extends Thread
 {
     private ServerSocket server;
     private String address;
-    private ArrayList<HostThread> hostThreads = new ArrayList<>();
+    private ArrayList<ConnectionThread> connectionThreads = new ArrayList<>();
     private int numOfPlayers;
+    static Boolean gameOngoing = false;
+    private Player[] playerList;
     private int port;
 
     public Host(int port, int numOfPlayers)
     {
         this.numOfPlayers = numOfPlayers;
+        playerList = new Player[numOfPlayers];
         this.port = port;
         try
         {
@@ -26,7 +27,7 @@ public class Host
         }
     }
 
-    public void start()
+    public void run()
     {
         //Creating the server
         try
@@ -40,22 +41,79 @@ public class Host
         System.out.println("Opening Host on Port " + port + ", Address: " + address);
 
         //Waiting for Clients
-        while(hostThreads.size() < numOfPlayers)
+        while(connectionThreads.size() < numOfPlayers && !server.isClosed())
         {
             try
             {
                 System.out.println("Waiting for Client");
                 Socket s = server.accept();
-                HostThread client = new HostThread(s, hostThreads);
-                hostThreads.add(client);
-                System.out.println("Client " + hostThreads.size() + " Connected");
+                ConnectionThread client = new ConnectionThread(s, connectionThreads);
+                playerList[connectionThreads.size()] = client.getPlayer();
+                connectionThreads.add(client);
+                System.out.println("Client " + connectionThreads.size() + " Connected");
                 client.start();
             }
             catch(Exception e){
-                e.printStackTrace();
+                System.out.println("Server Closed Prematurely");
             }
         }
+
+
+        //Start game once all players have connected
+        if(!server.isClosed())
+        {
+            System.out.println("Game Has Started");
+            gameOngoing = true;
+            for(ConnectionThread ct: connectionThreads)
+            {
+                ct.write(playerList);
+                ct.write("GAME_START");
+            }
+        }
+
+        //Close server
         close();
+
+        //Initialize Players
+        if(gameOngoing) {
+            for (int i = 0; i < numOfPlayers; i++) {
+                playerList[i] = connectionThreads.get(i).getPlayer();
+            }
+        }
+
+        //Handling turns
+        int currentTurn = 0;
+        while(gameOngoing)
+        {
+
+            //Preventing game from progressing until a response has been received
+            connectionThreads.get(currentTurn).setResponseReceived(false);
+            connectionThreads.get(currentTurn).write("PLAY_TURN");
+
+            //Update players
+            playerList[currentTurn] = connectionThreads.get(currentTurn).getPlayer();
+            for(ConnectionThread ct: connectionThreads)
+            {
+                ct.write(playerList);
+            }
+
+            //Print out current game state
+            for(ConnectionThread ct: connectionThreads)
+                System.out.println(ct.getPlayer().getName() + ": " + ct.getPlayer().getPoints());
+
+            //Change turn
+            currentTurn++;
+            if(currentTurn == numOfPlayers)
+                currentTurn = 0;
+        }
+
+        for(ConnectionThread ct: connectionThreads)
+            synchronized (ct) {
+                ct.write("GAME_END");
+            }
+
+        System.out.println("Game Ended");
+        System.exit(0);
     }
 
     public void close()
@@ -71,109 +129,13 @@ public class Host
     }
 
     //Getter
-    public ArrayList<HostThread> getHostThreads()
+    public ArrayList<ConnectionThread> getHostThreads()
     {
-        return hostThreads;
+        return connectionThreads;
     }
 
     public String getAddress()
     {
         return address;
-    }
-}
-
-class HostThread extends Thread
-{
-    private Socket client;
-    private ArrayList<HostThread> hostThreads;
-    private ObjectInputStream in;
-    private ObjectOutputStream out;
-    private int clientNumber;
-
-    public HostThread(Socket client, ArrayList<HostThread> hostThreads)
-    {
-        this.client = client;
-        try
-        {
-            this.out = new ObjectOutputStream(this.client.getOutputStream());
-            this.in = new ObjectInputStream(this.client.getInputStream());
-        }
-        catch(IOException e)
-        {
-            e.printStackTrace();
-        }
-        this.hostThreads = hostThreads;
-        this.clientNumber = hostThreads.size() + 1;
-        System.out.println("Client " + clientNumber + " Initialized");
-    }
-
-    public void run()
-    {
-        while(true)
-        {
-            try
-            {
-                //Conserving Performance
-                Thread.sleep(1);
-
-                //Reading client input
-                Object objIn = in.readObject();
-                if(objIn.toString().equals("QUIT"))
-                {
-                    close();
-                    break;
-                }
-                else
-                    {
-                        synchronized (this) {
-                            for(int i = 0; i < hostThreads.size(); i++)
-                            {
-                                if(hostThreads.get(i) != this)
-                                {
-                                    hostThreads.get(i).write(clientNumber+ ": "+ objIn);
-                                }
-                            }
-                        }
-                    }
-            }
-            catch(Exception e) {}
-        }
-
-    }
-
-    public void write(Object obj)
-    {
-        try
-        {
-            out.writeObject(obj);
-        }
-        catch(IOException e)
-        {
-            e.printStackTrace();
-        }
-    }
-
-    public void close()
-    {
-        try
-        {
-            synchronized (this) {
-                for(int i = 0; i < hostThreads.size(); i++)
-                {
-                    if(hostThreads.get(i) != this)
-                    {
-                        hostThreads.get(i).write("Client " + clientNumber + " Disconnected");
-                    }
-                }
-            }
-            client.close();
-            in.close();
-            out.close();
-            hostThreads.remove(this);
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace();
-        }
     }
 }
