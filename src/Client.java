@@ -2,7 +2,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.Scanner;
 
 public class Client extends Thread{
     private Socket socket;
@@ -10,12 +9,14 @@ public class Client extends Thread{
     private ObjectOutputStream out;
     private Player player;
     private Player[]  allPlayers;
-    private Boolean closed, gameStarted;
+    private Boolean closed, gameOngoing, gameStateChanged, isPlayerTurn;
 
     public Client(int port, String address, String clientName) throws IOException
     {
         this.closed = false;
-        this.gameStarted = false;
+        this.gameOngoing = false;
+        this.gameStateChanged = false;
+        this.isPlayerTurn = false;
         //TODO change later
 
         //Connecting to host
@@ -30,12 +31,13 @@ public class Client extends Thread{
         {
             try
             {
+                Thread.sleep(1);
                 int num = (int) in.readObject();
                 player = new Player(clientName, num, new DestinationCard(1), new DestinationCard(2));
                 System.out.println("Player #" + player.getNumber());
                 break;
             }
-            catch(ClassNotFoundException e){}
+            catch(Exception e){}
         }
 
         //Sending initial player data
@@ -51,9 +53,14 @@ public class Client extends Thread{
                 try
                 {
                     //Throws EOF Exception if there is nothing to read
+                    //Notify whenever host sends a message
+                    Thread.sleep(1);
                     Object input = in.readObject();
+                    gameStateChanged = true;
                     if(input instanceof String && input.equals("GAME_START"))
-                        gameStarted = true;
+                    {
+                        gameOngoing = true;
+                    }
                     if(input instanceof Player[])
                     {
                         allPlayers = (Player[]) input;
@@ -62,28 +69,37 @@ public class Client extends Thread{
                     }
                     else if(input.toString().equals("PLAY_TURN"))
                     {
-                        playTurn();
+                        isPlayerTurn = true;
                     }
                     else if(input.toString().equals("GAME_END"))
                     {
                         System.out.println("Game Ended");
+                        gameOngoing = false;
                         close();
                     }
-                    Thread.sleep(1);
                 }
                 catch(Exception e)
                 {}
         }
     }
 
-    public void playTurn()
+    public void playTurn(String userIn)
     {
-        String userIn = ClientTest.prompt(player.getName() + " Add Points: ");
         if(userIn.equals("QUIT"))
+        {
             close();
-        int addedPoints = Integer.parseInt(userIn);
-        player.setPoints(player.getPoints() + addedPoints);
-        update();
+        }
+        else
+            {
+                try {
+                    int addedPoints = Integer.parseInt(userIn);
+                    player.setPoints(player.getPoints() + addedPoints);
+                    update();
+                    isPlayerTurn = false;
+                }
+                catch(Exception e)
+                {}
+            }
     }
 
     //Run at the end of each this current player's turn
@@ -94,25 +110,33 @@ public class Client extends Thread{
             out.writeObject(player);
             out.reset();
         }
-        catch(IOException e)
+        catch(Exception e)
         {
             e.printStackTrace();
         }
     }
 
-    public Player getPlayer()
+    public Player getPlayer() { return player; }
+
+    public Player[] getAllPlayers() { return allPlayers; }
+
+    public Boolean getGameOngoing() { return gameOngoing; }
+
+    public void setGameOngoing(Boolean b)
     {
-        return player;
+        gameOngoing = b;
     }
 
-    public Player[] getAllPlayers()
-    {
-        return allPlayers;
+    public Boolean getGameStateChanged(){return gameStateChanged;}
+
+    public void setGameStateChanged(Boolean b){gameStateChanged = b;}
+
+    public Boolean getIsPlayerTurn(){
+        return isPlayerTurn;
     }
 
-    public Boolean getGameStarted()
-    {
-        return gameStarted;
+    public void setIsPlayerTurn(Boolean b){
+        isPlayerTurn = b;
     }
 
     void close()
@@ -121,6 +145,7 @@ public class Client extends Thread{
         {
             System.out.println("Closing Connection");
             out.writeObject("QUIT");
+            gameOngoing = false;
             closed = true;
             in.close();
             out.close();

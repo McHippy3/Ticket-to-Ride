@@ -1,5 +1,6 @@
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -84,6 +85,7 @@ public class TicketToRide extends Application {
     {
         //Root Node
         BorderPane rootNode = new BorderPane();
+        rootNode.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
 
         //Drawing Center (board and command panel)
         VBox centerBox = new VBox(25.0);
@@ -94,37 +96,81 @@ public class TicketToRide extends Application {
 
         //Command Panel
         GridPane commandPanel = new GridPane();
-
+        commandPanel.setAlignment(Pos.TOP_CENTER);
         commandPanel.setPrefSize(1296,250);
         commandPanel.setPadding(new Insets(10));
-        commandPanel.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
+        commandPanel.setVgap(25);
+        commandPanel.setHgap(25);
+        commandPanel.setBackground(new Background(new BackgroundFill(new Color(0.95, 0.95, 0.95, 0.75), CornerRadii.EMPTY, Insets.EMPTY)));
 
+        //Equally distributing the 3 options
+        ColumnConstraints c1 = new ColumnConstraints();
+        c1.setPercentWidth(100/3.0);
+        ColumnConstraints c2 = new ColumnConstraints();
+        c2.setPercentWidth(100/3.0);
+        ColumnConstraints c3 = new ColumnConstraints();
+        c3.setPercentWidth(100/3.0);
+        commandPanel.getColumnConstraints().addAll(c1, c2, c3);
+
+        //Command Panel content
+        Text label1 = new Text("ADD");
+        label1.setFont(new Font(25));
+        commandPanel.add(label1, 0,0,1,1);
+        GridPane.setHalignment(label1, HPos.CENTER);
+
+        TextField addField = new TextField();
+        addField.setPromptText("Add Points");
+        commandPanel.add(addField, 0,1);
+
+        Button addButton = new Button("Add Points");
+        addButton.setPadding(new Insets(3,10,3,10));
+        commandPanel.add(addButton, 0, 2);
+
+        //Adding to Center
         centerBox.getChildren().addAll(board, commandPanel);
         rootNode.setCenter(centerBox);
         BorderPane.setMargin(board, new Insets(10));
+
+        //Player Tiles
+        GridPane[] playerTiles = new GridPane[4];
+        for(int i = 0; i < playerTiles.length; i++)
+        {
+            playerTiles[i] = new GridPane();
+            playerTiles[i].setAlignment(Pos.CENTER);
+            playerTiles[i].setPrefSize(252, 500);
+            playerTiles[i].setPadding(new Insets((10)));
+            playerTiles[i].setVgap(5);
+            playerTiles[i].setHgap(5);
+            playerTiles[i].add(new Text("Player " + (i + 1)), 0, 0, 2, 1);
+            playerTiles[i].add(new Text("Points: " + i), 0, 1, 1, 1);
+
+            //Setting Color
+            BackgroundFill backgroundFill;
+            switch(i)
+            {
+                case 0:
+                    backgroundFill = new BackgroundFill(Color.LIGHTBLUE, CornerRadii.EMPTY, Insets.EMPTY);
+                    break;
+                case 1:
+                    backgroundFill = new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY);
+                    break;
+                case 2:
+                    backgroundFill = new BackgroundFill(Color.LIGHTYELLOW, CornerRadii.EMPTY, Insets.EMPTY);
+                    break;
+                default:
+                    backgroundFill = new BackgroundFill(Color.PINK, CornerRadii.EMPTY, Insets.EMPTY);
+                    break;
+            }
+            playerTiles[i].setBackground(new Background(backgroundFill));
+        }
 
         //Left Side Tiles
         VBox leftBox = new VBox(25.0);
         leftBox.setAlignment(Pos.CENTER);
         leftBox.setPadding(new Insets(25));
 
-        //Player 1
-        GridPane player1Tile = new GridPane();
-        player1Tile.setAlignment(Pos.CENTER);
-        player1Tile.setPrefSize(252,500);
-        player1Tile.setPadding(new Insets(10));
-        player1Tile.setBackground(new Background(new BackgroundFill(Color.LIGHTBLUE, CornerRadii.EMPTY, Insets.EMPTY)));
-        player1Tile.add(new Text("PLAYER 1"), 0, 0, 2, 2);
 
-        //Player 2
-        GridPane player2Tile = new GridPane();
-        player2Tile.setAlignment(Pos.CENTER);
-        player2Tile.setPrefSize(252,500);
-        player2Tile.setPadding(new Insets(10));
-        player2Tile.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
-        player2Tile.add(new Text("PLAYER 2"), 0, 0, 2, 2);
-
-        leftBox.getChildren().addAll(player1Tile, player2Tile);
+        leftBox.getChildren().addAll(playerTiles[0], playerTiles[1]);
         rootNode.setLeft(leftBox);
 
         //Right Side Tiles
@@ -132,23 +178,7 @@ public class TicketToRide extends Application {
         rightBox.setAlignment(Pos.CENTER);
         rightBox.setPadding(new Insets(25));
 
-        //Player 3
-        GridPane player3Tile = new GridPane();
-        player3Tile.setAlignment(Pos.CENTER);
-        player3Tile.setPrefSize(252,500);
-        player3Tile.setPadding(new Insets(10));
-        player3Tile.setBackground(new Background(new BackgroundFill(Color.LIGHTYELLOW, CornerRadii.EMPTY, Insets.EMPTY)));
-        player3Tile.add(new Text("PLAYER 3"), 0, 0, 2, 2);
-
-        //Player 4
-        GridPane player4Tile = new GridPane();
-        player4Tile.setAlignment(Pos.CENTER);
-        player4Tile.setPrefSize(252,500);
-        player4Tile.setPadding(new Insets(10));
-        player4Tile.setBackground(new Background(new BackgroundFill(Color.PINK, CornerRadii.EMPTY, Insets.EMPTY)));
-        player4Tile.add(new Text("PLAYER 4"), 0, 0, 2, 2);
-
-        rightBox.getChildren().addAll(player3Tile, player4Tile);
+        rightBox.getChildren().addAll(playerTiles[2], playerTiles[3]);
         rootNode.setRight(rightBox);
 
         //Setting Up Primary Stage and Scene
@@ -160,6 +190,7 @@ public class TicketToRide extends Application {
     {
         //Root Node
         BorderPane rootNode = new BorderPane();
+        rootNode.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
 
         //Drawing Center (board and command panel)
         VBox centerBox = new VBox(25.0);
@@ -170,35 +201,90 @@ public class TicketToRide extends Application {
 
         //Command Panel
         GridPane commandPanel = new GridPane();
-
+        commandPanel.setBackground(new Background(new BackgroundFill(new Color(0.95, 0.95, 0.95, 0.75), CornerRadii.EMPTY, Insets.EMPTY)));
         commandPanel.setPrefSize(1296,250);
         commandPanel.setPadding(new Insets(10));
-        commandPanel.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
+        commandPanel.setHgap(25);
+        commandPanel.setVgap(25);
+        commandPanel.setAlignment(Pos.TOP_CENTER);
+
+        //Equally distributing the 3 options
+        ColumnConstraints c1 = new ColumnConstraints();
+        c1.setPercentWidth(100/3.0);
+        ColumnConstraints c2 = new ColumnConstraints();
+        c2.setPercentWidth(100/3.0);
+        ColumnConstraints c3 = new ColumnConstraints();
+        c3.setPercentWidth(100/3.0);
+        commandPanel.getColumnConstraints().addAll(c1, c2, c3);
+
+        //Command Panel content
+        Text label1 = new Text("Add");
+        label1.setFont(new Font(25));
+        commandPanel.add(label1, 0,0,1,1);
+        GridPane.setHalignment(label1, HPos.CENTER);
+
+        TextField addField = new TextField();
+        addField.setPromptText("Add Points");
+        commandPanel.add(addField, 1,0);
+
+        Button addButton = new Button("Add Points");
+        addButton.setPadding(new Insets(3,10,3,10));
+        commandPanel.add(addButton, 2, 0);
+        addButton.setOnMouseClicked(
+                (MouseEvent e) -> {
+                    //Send addField's content and end if there is no error
+                    client.playTurn(addField.getText());
+                });
+
+        //Disable if not currently the player's turn
+        if(!client.getIsPlayerTurn())
+        {
+            addField.setDisable(true);
+            addButton.setDisable(true);
+        }
 
         centerBox.getChildren().addAll(board, commandPanel);
         rootNode.setCenter(centerBox);
         BorderPane.setMargin(board, new Insets(10));
+
+        //Player Tiles
+        GridPane[] playerTiles = new GridPane[client.getAllPlayers().length];
+        for(int i = 0; i < playerTiles.length; i++)
+        {
+            playerTiles[i] = new GridPane();
+            playerTiles[i].setPrefSize(252, 500);
+            playerTiles[i].setPadding(new Insets((10)));
+            playerTiles[i].setVgap(5);
+            playerTiles[i].setHgap(5);
+            playerTiles[i].add(new Text(client.getAllPlayers()[i].getName()), 0, 0, 2, 1);
+            playerTiles[i].add(new Text("Points: " + client.getAllPlayers()[i].getPoints()), 0, 1, 1, 1);
+
+            //Setting Color
+            BackgroundFill backgroundFill;
+            switch(i)
+            {
+                case 0:
+                    backgroundFill = new BackgroundFill(Color.LIGHTBLUE, CornerRadii.EMPTY, Insets.EMPTY);
+                    break;
+                case 1:
+                    backgroundFill = new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY);
+                    break;
+                case 2:
+                    backgroundFill = new BackgroundFill(Color.LIGHTYELLOW, CornerRadii.EMPTY, Insets.EMPTY);
+                    break;
+                default:
+                    backgroundFill = new BackgroundFill(Color.PINK, CornerRadii.EMPTY, Insets.EMPTY);
+                    break;
+            }
+            playerTiles[i].setBackground(new Background(backgroundFill));
+        }
 
         //Left Side Tiles
         VBox leftBox = new VBox(25.0);
         leftBox.setAlignment(Pos.CENTER);
         leftBox.setPadding(new Insets(25));
 
-        //Player 1
-        GridPane player1Tile = new GridPane();
-        player1Tile.setPrefSize(252,500);
-        player1Tile.setPadding(new Insets(10));
-        player1Tile.setBackground(new Background(new BackgroundFill(Color.LIGHTBLUE, CornerRadii.EMPTY, Insets.EMPTY)));
-        player1Tile.add(new Text(client.getAllPlayers()[0].getName()), 0, 0, 2, 2);
-
-        //Player 2
-        GridPane player2Tile = new GridPane();
-        player2Tile.setPrefSize(252,500);
-        player2Tile.setPadding(new Insets(10));
-        player2Tile.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
-        player2Tile.add(new Text(client.getAllPlayers()[1].getName()), 0, 0, 2, 2);
-
-        leftBox.getChildren().addAll(player1Tile, player2Tile);
+        leftBox.getChildren().addAll(playerTiles[0], playerTiles[1]);
         rootNode.setLeft(leftBox);
 
         //Right Side Tiles
@@ -206,21 +292,7 @@ public class TicketToRide extends Application {
         rightBox.setAlignment(Pos.CENTER);
         rightBox.setPadding(new Insets(25));
 
-        //Player 3
-        GridPane player3Tile = new GridPane();
-        player3Tile.setPrefSize(252,500);
-        player3Tile.setPadding(new Insets(10));
-        player3Tile.setBackground(new Background(new BackgroundFill(Color.LIGHTYELLOW, CornerRadii.EMPTY, Insets.EMPTY)));
-        player3Tile.add(new Text(client.getAllPlayers()[2].getName()), 0, 0, 2, 2);
-
-        //Player 4
-        GridPane player4Tile = new GridPane();
-        player4Tile.setPrefSize(252,500);
-        player4Tile.setPadding(new Insets(10));
-        player4Tile.setBackground(new Background(new BackgroundFill(Color.PINK, CornerRadii.EMPTY, Insets.EMPTY)));
-        player4Tile.add(new Text(client.getAllPlayers()[3].getName()), 0, 0, 2, 2);
-
-        rightBox.getChildren().addAll(player3Tile, player4Tile);
+        rightBox.getChildren().addAll(playerTiles[2], playerTiles[3]);
         rootNode.setRight(rightBox);
 
         //Setting Up Primary Stage and Scene
@@ -356,24 +428,7 @@ public class TicketToRide extends Application {
 
         primaryStage.setScene(new Scene(stackPane));
 
-
-
-        //Changes scene once all players have connected
-        Thread loadingThread = new Thread(() -> {
-            while(!client.getGameStarted()) {
-                try {
-                    Thread.sleep(1);
-                }
-                catch (InterruptedException e){}
-            }
-            //player.stop();
-            startOnline();
-        });
-
-        //Terminate thread if application exits
-        loadingThread.setDaemon(true);
-
-        loadingThread.start();
+        startOnlineGame();
     }
 
     private void createClient(int portNumber, String address, String name)
@@ -426,10 +481,33 @@ public class TicketToRide extends Application {
         setOfflineBoardScene();
     }
 
-    private void startOnline()
+    private void startOnlineGame()
     {
-        Platform.runLater(
-                () -> setOnlineBoardScene()
-        );
+        Thread updateThread = new Thread(() -> {
+            //Wait to be notified that the game has started
+            while(!client.getGameOngoing())
+            {
+                try
+                {
+                    Thread.sleep(1);
+                }
+                catch(InterruptedException e){}
+            }
+
+            //Update GUI whenever the game state changes
+            while(client.getGameOngoing()) {
+                while (!client.getGameStateChanged()) {
+                    try {
+                        Thread.sleep(1);
+                    } catch (InterruptedException e) {}
+                }
+                System.out.println("Game State Changed");
+                Platform.runLater(() -> setOnlineBoardScene());
+                client.setGameStateChanged(false);
+            }
+            });
+
+        updateThread.setDaemon(true);
+        updateThread.start();
     }
 }

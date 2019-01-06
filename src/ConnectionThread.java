@@ -63,6 +63,7 @@ class ConnectionThread extends Thread
                 if(objIn instanceof String && objIn.toString().equals("QUIT"))
                 {
                     //End game
+                    connectionThreads.remove(this);
                     Host.gameOngoing = false;
                     break;
                 }
