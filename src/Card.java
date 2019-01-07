@@ -1,30 +1,32 @@
 import javafx.scene.image.Image;
 
-public class Card {
+import java.io.Serializable;
+
+public class Card implements Serializable {
     private String cardType;
-    private Image image;
+    private String imageURL;
     public Card(String cardType)
     {
         this.cardType = cardType;
         switch (cardType)
         {
-            case "BLACK": image = new Image("src/res/black_card.jpg");
+            case "BLACK": imageURL = "res/black_card.jpg";
                 break;
-            case "BLUE": image = new Image("src/res/blue_card.jpg");
+            case "BLUE": imageURL = "res/blue_card.jpg";
                 break;
-            case "GREEN": image = new Image("src/res/green_card.jpg");
+            case "GREEN": imageURL = "res/green_card.jpg";
                 break;
-            case "ORANGE": image = new Image("src/res/orange_card.jpg");
+            case "ORANGE": imageURL = "res/orange_card.jpg";
                 break;
-            case "PINK": image = new Image("src/res/pink_card.jpg");
+            case "PINK": imageURL ="res/pink_card.jpg";
                 break;
-            case "RED": image = new Image("src/res/red_card.jpg");
+            case "RED": imageURL = "res/red_card.jpg";
                 break;
-            case "WHITE": image = new Image("src/res/white_card.jpg");
+            case "WHITE": imageURL = "res/white_card.jpg";
                 break;
-            case "YELLOW": image = new Image("src/res/yellow_card.jpg");
+            case "YELLOW": imageURL = "res/yellow_card.jpg";
                 break;
-            case "RAINBOW": image = new Image("src/res/rainbow_card.jpg");
+            case "RAINBOW": imageURL = "res/rainbow_card.jpg";
                 break;
         }
     }
@@ -36,6 +38,6 @@ public class Card {
 
     public Image getImage()
     {
-        return image;
+        return new Image(imageURL);
     }
 }

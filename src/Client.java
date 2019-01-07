@@ -8,7 +8,7 @@ public class Client extends Thread{
     private ObjectInputStream in;
     private ObjectOutputStream out;
     private Player player;
-    private Player[]  allPlayers;
+    private GameState gameState;
     private Boolean closed, gameOngoing, gameStateChanged, isPlayerTurn;
 
     public Client(int port, String address, String clientName) throws IOException
@@ -61,11 +61,9 @@ public class Client extends Thread{
                     {
                         gameOngoing = true;
                     }
-                    if(input instanceof Player[])
+                    else if(input instanceof GameState)
                     {
-                        allPlayers = (Player[]) input;
-                        for(Player pl: allPlayers)
-                            System.out.println(pl.getName() + " " + pl.getPoints());
+                        gameState = (GameState) input;
                     }
                     else if(input.toString().equals("PLAY_TURN"))
                     {
@@ -94,6 +92,7 @@ public class Client extends Thread{
                 try {
                     int addedPoints = Integer.parseInt(userIn);
                     player.setPoints(player.getPoints() + addedPoints);
+                    gameState.setPlayer(player.getNumber() - 1, player);
                     update();
                     isPlayerTurn = false;
                 }
@@ -107,7 +106,7 @@ public class Client extends Thread{
     {
         try
         {
-            out.writeObject(player);
+            out.writeObject(gameState);
             out.reset();
         }
         catch(Exception e)
@@ -118,26 +117,21 @@ public class Client extends Thread{
 
     public Player getPlayer() { return player; }
 
-    public Player[] getAllPlayers() { return allPlayers; }
+    public Player[] getAllPlayers() { return gameState.getPlayers(); }
+
+    public Card[] getAvailableCards(){return gameState.getAvailableCards();}
 
     public Boolean getGameOngoing() { return gameOngoing; }
-
-    public void setGameOngoing(Boolean b)
-    {
-        gameOngoing = b;
-    }
 
     public Boolean getGameStateChanged(){return gameStateChanged;}
 
     public void setGameStateChanged(Boolean b){gameStateChanged = b;}
 
-    public Boolean getIsPlayerTurn(){
-        return isPlayerTurn;
-    }
+    public Boolean getIsPlayerTurn(){return isPlayerTurn; }
 
-    public void setIsPlayerTurn(Boolean b){
-        isPlayerTurn = b;
-    }
+    public void setGameOngoing(Boolean b) { gameOngoing = b; }
+
+    public void setIsPlayerTurn(Boolean b){ isPlayerTurn = b; }
 
     void close()
     {

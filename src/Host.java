@@ -10,6 +10,7 @@ public class Host extends Thread
     private int numOfPlayers;
     static Boolean gameOngoing = false;
     private Player[] playerList;
+    private GameState gameState;
     private int port;
 
     public Host(int port, int numOfPlayers)
@@ -60,26 +61,28 @@ public class Host extends Thread
 
 
         //Start game once all players have connected
+        Deck deck = null;
+        Card[] availableCards = null;
+        gameState = null;
         if(!server.isClosed())
         {
             System.out.println("Game Has Started");
             gameOngoing = true;
+            //Initializing Deck and available cards
+            deck = new Deck();
+            availableCards = new Card[5];
+            for(int i = 0; i < 5; i++)
+                availableCards[i] = deck.getTop();
+            gameState = new GameState(playerList, availableCards);
             for(ConnectionThread ct: connectionThreads)
             {
-                ct.write(playerList);
+                ct.write(gameState);
                 ct.write("GAME_START");
             }
         }
 
         //Close server
         close();
-
-        //Initialize Players
-        if(gameOngoing) {
-            for (int i = 0; i < numOfPlayers; i++) {
-                playerList[i] = connectionThreads.get(i).getPlayer();
-            }
-        }
 
         //Handling turns
         int currentTurn = 0;
@@ -90,11 +93,16 @@ public class Host extends Thread
             connectionThreads.get(currentTurn).setResponseReceived(false);
             connectionThreads.get(currentTurn).write("PLAY_TURN");
 
+            //Checking for cards taken
+            for(int i = 0; i < 5; i++)
+                if(availableCards[i] == null)
+                    availableCards[i] = deck.getTop();
+
             //Update players
-            playerList[currentTurn] = connectionThreads.get(currentTurn).getPlayer();
+            gameState = connectionThreads.get(currentTurn).getGameState();
             for(ConnectionThread ct: connectionThreads)
             {
-                ct.write(playerList);
+                ct.write(gameState);
             }
 
             //Print out current game state

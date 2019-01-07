@@ -5,24 +5,16 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
-import javafx.stage.Popup;
 import javafx.stage.Stage;
-import javafx.stage.Window;
 import javafx.stage.WindowEvent;
-
-import java.io.File;
 import java.io.IOException;
 
 public class TicketToRide extends Application {
@@ -103,17 +95,16 @@ public class TicketToRide extends Application {
         commandPanel.setHgap(25);
         commandPanel.setBackground(new Background(new BackgroundFill(new Color(0.95, 0.95, 0.95, 0.75), CornerRadii.EMPTY, Insets.EMPTY)));
 
-        //Equally distributing the 3 options
-        ColumnConstraints c1 = new ColumnConstraints();
-        c1.setPercentWidth(100/3.0);
-        ColumnConstraints c2 = new ColumnConstraints();
-        c2.setPercentWidth(100/3.0);
-        ColumnConstraints c3 = new ColumnConstraints();
-        c3.setPercentWidth(100/3.0);
-        commandPanel.getColumnConstraints().addAll(c1, c2, c3);
+        //Equally distributing columns
+        for(int i = 0; i < 5; i++)
+        {
+            ColumnConstraints c = new ColumnConstraints();
+            c.setPercentWidth(20);
+            commandPanel.getColumnConstraints().add(c);
+        }
 
         //Command Panel content
-        Text label1 = new Text("ADD");
+        Text label1 = new Text("SELECT CARD");
         label1.setFont(new Font(25));
         commandPanel.add(label1, 0,0,1,1);
         GridPane.setHalignment(label1, HPos.CENTER);
@@ -125,6 +116,22 @@ public class TicketToRide extends Application {
         Button addButton = new Button("Add Points");
         addButton.setPadding(new Insets(3,10,3,10));
         commandPanel.add(addButton, 0, 2);
+
+        //Command Panel Column Two: Display Cards Available
+        Deck deck = new Deck();
+        ImageView[] cardImages = new ImageView[5];
+        for(int i = 0; i < 5; i++)
+        {
+            cardImages[i] = new ImageView(deck.getTop().getImage());
+            cardImages[i].setFitWidth(177);
+            cardImages[i].setFitHeight(114);
+            GridPane.setHalignment(cardImages[i], HPos.CENTER);
+        }
+        commandPanel.add(cardImages[0], 1, 0);
+        commandPanel.add(cardImages[1], 2, 0);
+        commandPanel.add(cardImages[2], 3, 0);
+        commandPanel.add(cardImages[3], 1, 1, 2, 1);
+        commandPanel.add(cardImages[4], 2, 1, 2, 1);
 
         //Adding to Center
         centerBox.getChildren().addAll(board, commandPanel);
@@ -208,28 +215,27 @@ public class TicketToRide extends Application {
         commandPanel.setVgap(25);
         commandPanel.setAlignment(Pos.TOP_CENTER);
 
-        //Equally distributing the 3 options
-        ColumnConstraints c1 = new ColumnConstraints();
-        c1.setPercentWidth(100/3.0);
-        ColumnConstraints c2 = new ColumnConstraints();
-        c2.setPercentWidth(100/3.0);
-        ColumnConstraints c3 = new ColumnConstraints();
-        c3.setPercentWidth(100/3.0);
-        commandPanel.getColumnConstraints().addAll(c1, c2, c3);
+        //Equally distributing columns
+        for(int i = 0; i < 5; i++)
+        {
+            ColumnConstraints c = new ColumnConstraints();
+            c.setPercentWidth(20);
+            commandPanel.getColumnConstraints().add(c);
+        }
 
-        //Command Panel content
-        Text label1 = new Text("Add");
+        //Command Panel Column One
+        Text label1 = new Text("SELECT CARD");
         label1.setFont(new Font(25));
         commandPanel.add(label1, 0,0,1,1);
         GridPane.setHalignment(label1, HPos.CENTER);
 
         TextField addField = new TextField();
         addField.setPromptText("Add Points");
-        commandPanel.add(addField, 1,0);
+        commandPanel.add(addField, 0,1);
 
         Button addButton = new Button("Add Points");
         addButton.setPadding(new Insets(3,10,3,10));
-        commandPanel.add(addButton, 2, 0);
+        commandPanel.add(addButton, 0, 2);
         addButton.setOnMouseClicked(
                 (MouseEvent e) -> {
                     //Send addField's content and end if there is no error
@@ -243,6 +249,22 @@ public class TicketToRide extends Application {
             addButton.setDisable(true);
         }
 
+        //Command Panel Column Two: Display Cards Available
+        ImageView[] cardImages = new ImageView[5];
+        for(int i = 0; i < 5; i++)
+        {
+            cardImages[i] = new ImageView(client.getAvailableCards()[i].getImage());
+            cardImages[i].setFitWidth(177);
+            cardImages[i].setFitHeight(114);
+            GridPane.setHalignment(cardImages[i], HPos.CENTER);
+        }
+        commandPanel.add(cardImages[0], 1, 0);
+        commandPanel.add(cardImages[1], 2, 0);
+        commandPanel.add(cardImages[2], 3, 0);
+        commandPanel.add(cardImages[3], 1, 1, 2, 1);
+        commandPanel.add(cardImages[4], 2, 1, 2, 1);
+
+        //Adding to Root
         centerBox.getChildren().addAll(board, commandPanel);
         rootNode.setCenter(centerBox);
         BorderPane.setMargin(board, new Insets(10));

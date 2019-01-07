@@ -8,6 +8,7 @@ class ConnectionThread extends Thread
     private Socket client;
     private ArrayList<ConnectionThread> connectionThreads;
     private Player player;
+    private GameState gameState;
     private ObjectInputStream in;
     private ObjectOutputStream out;
     private int clientNumber;
@@ -69,8 +70,8 @@ class ConnectionThread extends Thread
                 }
                 else
                     {
-                        player = (Player) objIn;
-                        System.out.println(player.getName() + " " + player.getPoints());
+                        gameState = (GameState) objIn;
+                        player = gameState.getPlayer(player.getNumber());
                     }
             }
             catch(Exception e) {}
@@ -101,6 +102,8 @@ class ConnectionThread extends Thread
     {
         return player;
     }
+
+    public GameState getGameState(){ return gameState; }
 
     public Boolean getResponseReceived()
     {
