@@ -121,7 +121,6 @@ public class Host extends Thread
             }
 
         System.out.println("Game Ended");
-        System.exit(0);
     }
 
     public void close()

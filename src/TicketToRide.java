@@ -10,17 +10,24 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+
+import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 public class TicketToRide extends Application {
     private Stage primaryStage;
     private Host host;
     private Client client;
+    private MediaPlayer player;
 
     public void start(Stage primaryStage){
         this.primaryStage = primaryStage;
@@ -383,8 +390,10 @@ public class TicketToRide extends Application {
 
         //Closes server when the window is closed
         primaryStage.setOnCloseRequest(
-                (WindowEvent e) -> host.close()
-        );
+                (WindowEvent e) -> {
+                    host.close();
+                    System.exit(0);
+                });
 
     }
 
@@ -401,7 +410,6 @@ public class TicketToRide extends Application {
         //Text Fields
         TextField nameField = new TextField();
         nameField.setPromptText("Name");
-        nameField.setText("David"); //TODO Change Later
         nameField.setMaxWidth(100);
 
         TextField portField = new TextField();
@@ -411,7 +419,13 @@ public class TicketToRide extends Application {
 
         TextField addressField = new TextField();
         addressField.setPromptText("Address");
-        addressField.setText("192.168.56.1"); //TODO Change Later
+        try {
+            addressField.setText(InetAddress.getLocalHost().getHostAddress()); //TODO Change Later
+        }
+        catch(UnknownHostException e)
+        {
+            addressField.clear();
+        }
         addressField.setMaxWidth(100);
 
         //Buttons
@@ -444,9 +458,9 @@ public class TicketToRide extends Application {
 
         //Plays generic elevator music
         //TODO Uncomment
-        /*Media loadingMusic = new Media(new File("src/res/Elevator-music.mp3").toURI().toString());
-        MediaPlayer player = new MediaPlayer(loadingMusic);
-        player.play();*/
+        Media loadingMusic = new Media(new File("src/res/Elevator-music.mp3").toURI().toString());
+        player = new MediaPlayer(loadingMusic);
+        player.play();
 
         primaryStage.setScene(new Scene(stackPane));
 
@@ -515,6 +529,9 @@ public class TicketToRide extends Application {
                 }
                 catch(InterruptedException e){}
             }
+
+            //Stop playing generic elevator music
+            player.stop();
 
             //Update GUI whenever the game state changes
             while(client.getGameOngoing()) {
